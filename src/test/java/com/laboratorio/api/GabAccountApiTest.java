@@ -1,0 +1,254 @@
+package com.laboratorio.api;
+
+import com.laboratorio.gabapiinterface.exception.GabApiException;
+import com.laboratorio.gabapiinterface.impl.GabAccountApiImpl;
+import com.laboratorio.gabapiinterface.model.GabAccount;
+import com.laboratorio.gabapiinterface.model.GabRelationship;
+import com.laboratorio.gabapiinterface.model.response.GabAccountListResponse;
+import com.laboratorio.gabapiinterface.utils.GabApiConfig;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
+import com.laboratorio.gabapiinterface.GabAccountApi;
+
+/**
+ *
+ * @author Rafael
+ * @version 1.0
+ * @created 11/09/2024
+ * @updated 12/09/2024
+ */
+
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class GabAccountApiTest {
+    private static GabAccountApi accountApi;
+    
+    @BeforeEach
+    public void initTest() {
+        String accessToken = GabApiConfig.getInstance().getProperty("access_token");
+        accountApi = new GabAccountApiImpl(accessToken);
+    }
+    
+    @Test
+    public void getAccountById() {
+        String userId = "265538";
+        
+        GabAccount account = accountApi.getAccountById(userId);
+        
+        assertEquals(userId, account.getId());
+    }
+    
+    @Test
+    public void findAccountByInvalidId() {
+        String id = "1125349753AAABBB60";
+        
+        assertThrows(GabApiException.class, () -> {
+            accountApi.getAccountById(id);
+        });
+    }
+    
+    @Test
+    public void get40Followers() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 40;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowers(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get40FollowersDefaultLimit() throws Exception {
+        String id = "265538";
+        int defaultLimit = 0;
+        int cantidad = 40;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowers(id, defaultLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get80Followers() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 80;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowers(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get81Followers() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 81;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowers(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get200Followers() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 200;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowers(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void getAllFollowers() throws Exception {     // Usa default limit
+        String id = "5511959";
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowers(id);
+        assertTrue(accountListResponse.getMaxId() == null);
+        assertTrue(!accountListResponse.getAccounts().isEmpty());
+    }
+    
+    @Test
+    public void getFollowersInvalidId() {
+        String id = "1125349753AAABBB60";
+        
+        assertThrows(GabApiException.class, () -> {
+            accountApi.getFollowers(id);
+        });
+    }
+    
+    @Test
+    public void get40Followings() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 40;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowings(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get40FollowingsDefaultLimit() throws Exception {
+        String id = "265538";
+        int defaulLimit = 0;
+        int cantidad = 40;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowings(id, defaulLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get80Followings() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 80;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowings(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get81Followings() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 81;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowings(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+    
+    @Test
+    public void get200Followings() throws Exception {
+        String id = "265538";
+        int maxLimit = 80;
+        int cantidad = 200;
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowings(id, maxLimit, cantidad);
+
+        assertEquals(cantidad, accountListResponse.getAccounts().size());
+        assertTrue(!accountListResponse.getMaxId().isEmpty());
+    }
+
+    @Test
+    public void getAllFollowings() throws Exception { // Usa default limit
+        String id = "5511959";
+        
+        GabAccountListResponse accountListResponse = accountApi.getFollowings(id);
+
+        assertTrue(accountListResponse.getAccounts().size() >= 0);
+        assertTrue(accountListResponse.getMaxId() == null);
+    }
+    
+    @Test
+    public void getFollowingsInvalidId() {
+        String id = "1125349753AAABBB60";
+        
+        assertThrows(GabApiException.class, () -> {
+            accountApi.getFollowings(id);
+        });
+    }
+    
+    @Test @Order(1)
+    public void followAccount() {
+        String id = "5511959";
+        
+        boolean result = accountApi.followAccount(id);
+        
+        assertTrue(result);
+    }
+    
+    @Test
+    public void followInvalidAccount() {
+        String id = "1125349753AAABBB60";
+        
+        assertThrows(GabApiException.class, () -> {
+            accountApi.followAccount(id);
+        });
+    }
+    
+    @Test @Order(2)
+    public void unfollowAccount() {
+        String id = "5511959";
+        
+        boolean result = accountApi.unfollowAccount(id);
+        
+        assertTrue(result);
+    }
+    
+    @Test
+    public void unfollowInvalidAccount() {
+        String id = "1125349753AAABBB60";
+        
+        assertThrows(GabApiException.class, () -> {
+            accountApi.unfollowAccount(id);
+        });
+    }
+    
+    @Test
+    public void checkMutualRelationship() {
+        String userId = "265538";
+        
+        GabRelationship relationship  = accountApi.checkrelationships(userId);
+        assertTrue(relationship.isFollowing());
+        assertTrue(relationship.isFollowed_by());
+    }
+}
