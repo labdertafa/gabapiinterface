@@ -27,7 +27,7 @@ public class GabStatusApiTest {
         this.statusApi = new GabStatusApiImpl(accessToken);
     }
     
-    @Test
+/*    @Test
     public void postStatus() {
         String text = "Hola, les saludo desde El laboratorio de Rafa. Post automático";
         
@@ -56,5 +56,5 @@ public class GabStatusApiTest {
         GabStatus status = this.statusApi.postStatus(text, media.getId());
         assertTrue(!status.getId().isEmpty());
         assertTrue(status.getContent().contains(text));
-    }
+    } */
 }

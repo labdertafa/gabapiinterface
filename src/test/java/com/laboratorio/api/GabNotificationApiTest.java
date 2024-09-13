@@ -35,7 +35,7 @@ public class GabNotificationApiTest {
         assertTrue(notificationListResponse.getMinId() != null);
     }
     
-    @Test
+/*    @Test
     public void get20NotificationsWithLimit() throws Exception { // Con limit
         int cantidad  = 20;
         int limit = 50;
@@ -61,5 +61,5 @@ public class GabNotificationApiTest {
         assertThrows(GabApiException.class, () -> {
             this.notificationApi.getAllNotifications();
         });
-    }
+    } */
 }

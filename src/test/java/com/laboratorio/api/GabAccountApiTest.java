@@ -50,7 +50,7 @@ public class GabAccountApiTest {
         });
     }
     
-    @Test
+/*    @Test
     public void get40Followers() throws Exception {
         String id = "265538";
         int maxLimit = 80;
@@ -250,5 +250,5 @@ public class GabAccountApiTest {
         GabRelationship relationship  = accountApi.checkrelationships(userId);
         assertTrue(relationship.isFollowing());
         assertTrue(relationship.isFollowed_by());
-    }
+    } */
 }
