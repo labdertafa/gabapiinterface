@@ -13,13 +13,16 @@ import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.TestMethodOrder;
 import com.laboratorio.gabapiinterface.GabAccountApi;
+import com.laboratorio.gabapiinterface.model.GabSuggestionType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
  * @author Rafael
  * @version 1.0
  * @created 11/09/2024
- * @updated 12/09/2024
+ * @updated 17/09/2024
  */
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -241,14 +244,24 @@ public class GabAccountApiTest {
         assertThrows(GabApiException.class, () -> {
             accountApi.unfollowAccount(id);
         });
-    }
+    } */
     
     @Test
     public void checkMutualRelationship() {
-        String userId = "265538";
+        List<String> usersId = new ArrayList<>();
+        usersId.add("24835");
+        usersId.add("725749");
+        usersId.add("265538");
         
-        GabRelationship relationship  = accountApi.checkrelationships(userId);
-        assertTrue(relationship.isFollowing());
-        assertTrue(relationship.isFollowed_by());
-    } */
+        List<GabRelationship> relationships  = accountApi.checkrelationships(usersId);
+        assertEquals(3, relationships.size());
+        assertTrue(relationships.get(2).isFollowing());
+        assertTrue(relationships.get(2).isFollowed_by());
+    }
+    
+    @Test
+    public void getSuggestions() {
+        List<GabAccount> accounts = accountApi.getSuggestions(GabSuggestionType.VERIFIED);
+        assertTrue(accounts.size() >= 0);
+    }
 }

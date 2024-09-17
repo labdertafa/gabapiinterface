@@ -60,10 +60,6 @@ public class GabAccount {
             return false;
         }
 
-        /* if (this.last_status_at == null) {
-            return false;
-        } */
-
         if (this.last_status_at != null) {
             LocalDate ultimaActividad;
             try {

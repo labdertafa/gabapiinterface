@@ -2,14 +2,16 @@ package com.laboratorio.gabapiinterface;
 
 import com.laboratorio.gabapiinterface.model.GabAccount;
 import com.laboratorio.gabapiinterface.model.GabRelationship;
+import com.laboratorio.gabapiinterface.model.GabSuggestionType;
 import com.laboratorio.gabapiinterface.model.response.GabAccountListResponse;
+import java.util.List;
 
 /**
  *
  * @author Rafael
  * @version 1.0
  * @created 05/09/2024
- * @updated 12/09/2024
+ * @updated 17/09/2024
  */
 public interface GabAccountApi {
     GabAccount getAccountById(String userId);
@@ -30,5 +32,8 @@ public interface GabAccountApi {
     boolean unfollowAccount(String userId);
     
     // Chequea la relación con otro usuario
-    GabRelationship checkrelationships(String userId);
+    List<GabRelationship> checkrelationships(List<String> usersId);
+    
+    // Obtiene el listado de sugerencias de seguimiento para el usuario
+    List<GabAccount> getSuggestions(GabSuggestionType type);
 }

@@ -11,7 +11,7 @@ import com.laboratorio.gabapiinterface.GabStatusApi;
  * @author Rafael
  * @version 1.0
  * @created 12/09/2024
- * @updated 12/09/2024
+ * @updated 17/09/2024
  */
 public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     public GabStatusApiImpl(String accessToken) {
@@ -24,7 +24,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     }
 
     @Override
-    public GabStatus postStatus(String text, String imagenId) {
+    public GabStatus postStatusWithImage(String text, GabMediaAttachment mediaAttachment) {
         String endpoint = this.apiConfig.getProperty("postStatus_endpoint");
         int okStatus = Integer.parseInt(this.apiConfig.getProperty("postStatus_ok_status"));
         
@@ -34,8 +34,8 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             request.addApiPathParam("status", text);
             request.addApiPathParam("visibility", "public");
             request.addApiPathParam("language", "es");
-            if (imagenId != null) {
-                request.addApiPathParam("media_ids[]", imagenId);
+            if (mediaAttachment != null) {
+                request.addApiPathParam("media_ids[]", mediaAttachment.getId());
             }
             
             request.addApiHeader("Content-Type", "application/json");
@@ -43,6 +43,20 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             
             String jsonStr = this.client.executePostRequest(request);
             return this.gson.fromJson(jsonStr, GabStatus.class);
+        } catch (Exception e) {
+            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+        }
+    }
+    
+    @Override
+    public GabStatus postStatus(String text, String filePath) {
+        try {
+            if (filePath != null) {
+                GabMediaAttachment mediaAttachment = this.uploadImage(filePath);
+                return this.postStatusWithImage(text, mediaAttachment);
+            }
+            
+            return this.postStatusWithImage(text, null);
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
@@ -57,6 +71,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             String uri = endpoint;
             
             ApiRequest request = new ApiRequest(uri, okStatus);
+            request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             request.addFileFormData("file", filePath);
                         

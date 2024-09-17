@@ -88,7 +88,7 @@ public class GabBaseApi {
             
             ProcessedResponse response = this.client.getProcessedResponseGetRequest(request);
             
-            List<GabAccount> accounts = gson.fromJson(response.getResponseDetail(), new TypeToken<List<GabAccount>>(){}.getType());
+            List<GabAccount> accounts = this.gson.fromJson(response.getResponseDetail(), new TypeToken<List<GabAccount>>(){}.getType());
             String maxId = null;
             if (!accounts.isEmpty()) {
                 log.debug("Se ejecutó la query: " + uri);

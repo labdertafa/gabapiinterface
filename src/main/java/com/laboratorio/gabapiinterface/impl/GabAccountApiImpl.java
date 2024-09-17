@@ -8,15 +8,18 @@ import com.laboratorio.gabapiinterface.model.GabAccount;
 import com.laboratorio.gabapiinterface.model.GabRelationship;
 import com.laboratorio.gabapiinterface.model.response.GabAccountListResponse;
 import com.laboratorio.gabapiinterface.utils.InstruccionInfo;
-import java.util.List;
 import com.laboratorio.gabapiinterface.GabAccountApi;
+import com.laboratorio.gabapiinterface.model.GabSuggestionType;
+import com.laboratorio.gabapiinterface.model.request.GabRelationshipRequest;
+import com.laboratorio.gabapiinterface.model.response.GabSuggestionsResponse;
+import java.util.List;
 
 /**
  *
  * @author Rafael
  * @version 1.0
  * @created 11/09/2024
- * @updated 12/09/2024
+ * @updated 17/09/2024
  */
 public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
     public GabAccountApiImpl(String accessToken) {
@@ -118,9 +121,9 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
             String jsonStr = this.client.executePostRequest(request);
-            GabRelationship response = this.gson.fromJson(jsonStr, GabRelationship.class);
+            GabRelationship relationship = this.gson.fromJson(jsonStr, GabRelationship.class);
             
-            return response.isFollowing();
+            return relationship.isFollowing();
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
@@ -140,32 +143,59 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
             String jsonStr = this.client.executePostRequest(request);
-            GabRelationship response = this.gson.fromJson(jsonStr, GabRelationship.class);
+            GabRelationship relationship = this.gson.fromJson(jsonStr, GabRelationship.class);
             
-            return !response.isFollowing();
+            return !relationship.isFollowing();
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
     }
 
     @Override
-    public GabRelationship checkrelationships(String userId) {
+    public List<GabRelationship> checkrelationships(List<String> usersId) {
         String endpoint = this.apiConfig.getProperty("checkrelationships_endpoint");
-        String complementoUrl = this.apiConfig.getProperty("checkrelationships_complemento_url");
         int okStatus = Integer.parseInt(this.apiConfig.getProperty("checkrelationships_ok_status"));
         
         try {
-            String uri = endpoint + "/" + userId + "/" + complementoUrl;
+            GabRelationshipRequest relationshipRequest = new GabRelationshipRequest(usersId);
+            String requestJson = this.gson.toJson(relationshipRequest);
+            
+            String uri = endpoint;
             ApiRequest request = new ApiRequest(uri, okStatus);
+            
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.setPayload(requestJson);
             
             String jsonStr = this.client.executePostRequest(request);
             
-            return this.gson.fromJson(jsonStr, GabRelationship.class);
+            return this.gson.fromJson(jsonStr, new TypeToken<List<GabRelationship>>(){}.getType());
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
     }
-    
+
+    @Override
+    public List<GabAccount> getSuggestions(GabSuggestionType type) {
+        String endpoint = this.apiConfig.getProperty("getSuggestions_endpoint");
+        int okStatus = Integer.parseInt(this.apiConfig.getProperty("getSuggestions_ok_status"));
+        
+        try {
+            String uri = endpoint + "?type=" + type.name().toLowerCase();
+            ApiRequest request = new ApiRequest(uri, okStatus);
+            // request.addApiHeader("type", type.name().toLowerCase());
+            
+            request.addApiHeader("Content-Type", "application/json");
+            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+
+            String jsonStr = this.client.executeGetRequest(request);
+            GabSuggestionsResponse response = this.gson.fromJson(jsonStr, GabSuggestionsResponse.class);
+            
+            log.debug("Cuentas sugeridas encontradas: " + response.getAccounts().size());
+            
+            return response.getAccounts();
+        } catch (Exception e) {
+            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+        }
+    }
 }
