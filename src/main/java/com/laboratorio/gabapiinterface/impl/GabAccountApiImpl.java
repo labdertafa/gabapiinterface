@@ -2,7 +2,9 @@ package com.laboratorio.gabapiinterface.impl;
 
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.laboratorio.clientapilibrary.model.ApiMethodType;
 import com.laboratorio.clientapilibrary.model.ApiRequest;
+import com.laboratorio.clientapilibrary.model.ApiResponse;
 import com.laboratorio.gabapiinterface.exception.GabApiException;
 import com.laboratorio.gabapiinterface.model.GabAccount;
 import com.laboratorio.gabapiinterface.model.GabRelationship;
@@ -17,9 +19,9 @@ import java.util.List;
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 11/09/2024
- * @updated 17/09/2024
+ * @updated 06/10/2024
  */
 public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
     public GabAccountApiImpl(String accessToken) {
@@ -33,12 +35,12 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         
         try {
             String url = endpoint + "/" + userId;
-            ApiRequest request = new ApiRequest(url, okStatus);
+            ApiRequest request = new ApiRequest(url, okStatus, ApiMethodType.GET);
             request.addApiHeader("Content-Type", "application/json");
             
-            String jsonStr = this.client.executeGetRequest(request);
+            ApiResponse response = this.client.executeApiRequest(request);
             
-            return this.gson.fromJson(jsonStr, GabAccount.class);
+            return this.gson.fromJson(response.getResponseStr(), GabAccount.class);
         } catch (JsonSyntaxException e) {
             logException(e);
             throw e;
@@ -74,7 +76,7 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             usedLimit = defaultLimit;
         }
         InstruccionInfo instruccionInfo = new InstruccionInfo(endpoint, complementoUrl, okStatus, usedLimit);
-        return this.getCounterAccountList(instruccionInfo, userId, quantity, posicionInicial);
+        return this.getAccountList(instruccionInfo, userId, quantity, posicionInicial);
     }
 
     @Override
@@ -104,7 +106,7 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             usedLimit = defaultLimit;
         }
         InstruccionInfo instruccionInfo = new InstruccionInfo(endpoint, complementoUrl, okStatus, usedLimit);
-        return this.getCounterAccountList(instruccionInfo, userId, quantity, posicionInicial);
+        return this.getAccountList(instruccionInfo, userId, quantity, posicionInicial);
     }
 
     @Override
@@ -116,14 +118,17 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         try {
             String uri = endpoint + "/" + userId + "/" + complementoUrl;
             
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
-            String jsonStr = this.client.executePostRequest(request);
-            GabRelationship relationship = this.gson.fromJson(jsonStr, GabRelationship.class);
+            ApiResponse response = this.client.executeApiRequest(request);
+            GabRelationship relationship = this.gson.fromJson(response.getResponseStr(), GabRelationship.class);
             
             return relationship.isFollowing();
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
@@ -138,14 +143,17 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         try {
             String uri = endpoint + "/" + userId + "/" + complementoUrl;
 
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
-            String jsonStr = this.client.executePostRequest(request);
-            GabRelationship relationship = this.gson.fromJson(jsonStr, GabRelationship.class);
+            ApiResponse response = this.client.executeApiRequest(request);
+            GabRelationship relationship = this.gson.fromJson(response.getResponseStr(), GabRelationship.class);
             
             return !relationship.isFollowing();
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
@@ -161,15 +169,17 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             String requestJson = this.gson.toJson(relationshipRequest);
             
             String uri = endpoint;
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST, requestJson);
             
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
-            request.setPayload(requestJson);
             
-            String jsonStr = this.client.executePostRequest(request);
+            ApiResponse response = this.client.executeApiRequest(request);
             
-            return this.gson.fromJson(jsonStr, new TypeToken<List<GabRelationship>>(){}.getType());
+            return this.gson.fromJson(response.getResponseStr(), new TypeToken<List<GabRelationship>>(){}.getType());
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
@@ -182,18 +192,21 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         
         try {
             String uri = endpoint + "?type=" + type.name().toLowerCase();
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.GET);
             // request.addApiHeader("type", type.name().toLowerCase());
             
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
 
-            String jsonStr = this.client.executeGetRequest(request);
-            GabSuggestionsResponse response = this.gson.fromJson(jsonStr, GabSuggestionsResponse.class);
+            ApiResponse response = this.client.executeApiRequest(request);
+            GabSuggestionsResponse suggestionsResponse = this.gson.fromJson(response.getResponseStr(), GabSuggestionsResponse.class);
             
-            log.debug("Cuentas sugeridas encontradas: " + response.getAccounts().size());
+            log.debug("Cuentas sugeridas encontradas: " + suggestionsResponse.getAccounts().size());
             
-            return response.getAccounts();
+            return suggestionsResponse.getAccounts();
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }

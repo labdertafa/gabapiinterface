@@ -1,6 +1,9 @@
 package com.laboratorio.gabapiinterface.impl;
 
+import com.google.gson.JsonSyntaxException;
+import com.laboratorio.clientapilibrary.model.ApiMethodType;
 import com.laboratorio.clientapilibrary.model.ApiRequest;
+import com.laboratorio.clientapilibrary.model.ApiResponse;
 import com.laboratorio.gabapiinterface.exception.GabApiException;
 import com.laboratorio.gabapiinterface.model.GabMediaAttachment;
 import com.laboratorio.gabapiinterface.model.GabStatus;
@@ -9,9 +12,9 @@ import com.laboratorio.gabapiinterface.GabStatusApi;
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 12/09/2024
- * @updated 17/09/2024
+ * @updated 06/10/2024
  */
 public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     public GabStatusApiImpl(String accessToken) {
@@ -30,7 +33,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
         
         try {
             String uri = endpoint;
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
             request.addApiPathParam("status", text);
             request.addApiPathParam("visibility", "public");
             request.addApiPathParam("language", "es");
@@ -41,8 +44,12 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
-            String jsonStr = this.client.executePostRequest(request);
-            return this.gson.fromJson(jsonStr, GabStatus.class);
+            ApiResponse response = this.client.executeApiRequest(request);
+            
+            return this.gson.fromJson(response.getResponseStr(), GabStatus.class);
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
@@ -70,14 +77,38 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
         try {
             String uri = endpoint;
             
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             request.addFileFormData("file", filePath);
                         
-            String jsonStr = this.client.executePostRequest(request);
+            ApiResponse response = this.client.executeApiRequest(request);
             
-            return this.gson.fromJson(jsonStr, GabMediaAttachment.class);
+            return this.gson.fromJson(response.getResponseStr(), GabMediaAttachment.class);
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
+        } catch (Exception e) {
+            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean deleteStatus(String id) {
+        String endpoint = this.apiConfig.getProperty("deleteStatus_endpoint");
+        int okStatus = Integer.parseInt(this.apiConfig.getProperty("deleteStatus_ok_status"));
+        
+        try {
+            String uri = endpoint + "/" + id;
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.DELETE);
+            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            
+            this.client.executeApiRequest(request);
+            
+            return true;
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }

@@ -4,9 +4,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.laboratorio.clientapilibrary.ApiClient;
-import com.laboratorio.clientapilibrary.impl.ApiClientImpl;
+import com.laboratorio.clientapilibrary.model.ApiMethodType;
 import com.laboratorio.clientapilibrary.model.ApiRequest;
-import com.laboratorio.clientapilibrary.model.ProcessedResponse;
+import com.laboratorio.clientapilibrary.model.ApiResponse;
 import com.laboratorio.gabapiinterface.exception.GabApiException;
 import com.laboratorio.gabapiinterface.model.GabAccount;
 import com.laboratorio.gabapiinterface.model.response.GabAccountListResponse;
@@ -21,9 +21,9 @@ import org.apache.logging.log4j.Logger;
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 11/09/2024
- * @updated 11/09/2024
+ * @updated 06/11/2024
  */
 public class GabBaseApi {
     protected static final Logger log = LogManager.getLogger(GabBaseApi.class);
@@ -33,7 +33,7 @@ public class GabBaseApi {
     protected final Gson gson;
     
     public GabBaseApi(String accessToken) {
-        this.client = new ApiClientImpl();
+        this.client = new ApiClient();
         this.accessToken = accessToken;
         this.apiConfig = GabApiConfig.getInstance();
         this.gson = new Gson();
@@ -77,7 +77,7 @@ public class GabBaseApi {
     // Función que devuelve una página de seguidores o seguidos de una cuenta
     private GabAccountListResponse getAccountPage(String uri, int okStatus, int limit, String posicionInicial) throws Exception {
         try {
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.GET);
             request.addApiPathParam("limit", Integer.toString(limit));
             if (posicionInicial != null) {
                 request.addApiPathParam("max_id", posicionInicial);
@@ -86,18 +86,21 @@ public class GabBaseApi {
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
-            ProcessedResponse response = this.client.getProcessedResponseGetRequest(request);
+            ApiResponse response = this.client.executeApiRequest(request);
             
-            List<GabAccount> accounts = this.gson.fromJson(response.getResponseDetail(), new TypeToken<List<GabAccount>>(){}.getType());
+            List<GabAccount> accounts = this.gson.fromJson(response.getResponseStr(), new TypeToken<List<GabAccount>>(){}.getType());
             String maxId = null;
             if (!accounts.isEmpty()) {
                 log.debug("Se ejecutó la query: " + uri);
                 log.debug("Resultados encontrados: " + accounts.size());
 
-                String linkHeader = response.getResponse().getHeaderString("link");
-                log.debug("Recibí este link: " + linkHeader);
-                maxId = this.extractMaxId(linkHeader);
-                log.debug("Valor del max_id: " + maxId);
+                List<String> linkHeaderList = response.getHttpHeaders().get("link");
+                if ((linkHeaderList != null) && (!linkHeaderList.isEmpty())) {
+                    String linkHeader = linkHeaderList.get(0);
+                    log.debug("Recibí este link: " + linkHeader);
+                    maxId = this.extractMaxId(linkHeader);
+                    log.debug("Valor del max_id: " + maxId);
+                }
             }
 
             // return accounts;
@@ -110,7 +113,7 @@ public class GabBaseApi {
         }
     }
     
-    protected GabAccountListResponse getCounterAccountList(InstruccionInfo instruccionInfo, String userId, int quantity, String posicionInicial) throws Exception {
+    protected GabAccountListResponse getAccountList(InstruccionInfo instruccionInfo, String userId, int quantity, String posicionInicial) throws Exception {
         List<GabAccount> accounts = null;
         boolean continuar = true;
         String endpoint = instruccionInfo.getEndpoint();

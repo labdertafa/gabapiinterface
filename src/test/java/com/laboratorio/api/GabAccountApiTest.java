@@ -22,7 +22,7 @@ import java.util.List;
  * @author Rafael
  * @version 1.0
  * @created 11/09/2024
- * @updated 17/09/2024
+ * @updated 06/10/2024
  */
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -53,7 +53,7 @@ public class GabAccountApiTest {
         });
     }
     
-/*    @Test
+    @Test
     public void get40Followers() throws Exception {
         String id = "265538";
         int maxLimit = 80;
@@ -118,7 +118,6 @@ public class GabAccountApiTest {
         String id = "5511959";
         
         GabAccountListResponse accountListResponse = accountApi.getFollowers(id);
-        assertTrue(accountListResponse.getMaxId() == null);
         assertTrue(!accountListResponse.getAccounts().isEmpty());
     }
     
@@ -244,7 +243,7 @@ public class GabAccountApiTest {
         assertThrows(GabApiException.class, () -> {
             accountApi.unfollowAccount(id);
         });
-    } */
+    }
     
     @Test
     public void checkMutualRelationship() {

@@ -2,8 +2,9 @@ package com.laboratorio.gabapiinterface.impl;
 
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
+import com.laboratorio.clientapilibrary.model.ApiMethodType;
 import com.laboratorio.clientapilibrary.model.ApiRequest;
-import com.laboratorio.clientapilibrary.model.ProcessedResponse;
+import com.laboratorio.clientapilibrary.model.ApiResponse;
 import com.laboratorio.gabapiinterface.exception.GabApiException;
 import com.laboratorio.gabapiinterface.model.GabNotification;
 import com.laboratorio.gabapiinterface.model.response.GabNotificationListResponse;
@@ -13,9 +14,9 @@ import com.laboratorio.gabapiinterface.GabNotificationApi;
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 11/09/2024
- * @updated 11/09/2024
+ * @updated 06/10/2024
  */
 public class GabNotificationApiImpl extends GabBaseApi implements GabNotificationApi {
     public GabNotificationApiImpl(String accessToken) {
@@ -40,25 +41,28 @@ public class GabNotificationApiImpl extends GabBaseApi implements GabNotificatio
     // Función que devuelve una página de notificaciones de una cuenta
     private GabNotificationListResponse getNotificationPage(String uri, int limit, int okStatus, String posicionInicial) throws Exception {
         try {
-            ApiRequest request = new ApiRequest(uri, okStatus);
+            ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.GET);
             request.addApiPathParam("limit", Integer.toString(limit));
             request.addApiPathParam("min_id", posicionInicial);
             
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
-            ProcessedResponse response = this.client.getProcessedResponseGetRequest(request);
+            ApiResponse response = this.client.executeApiRequest(request);
             
             String minId = posicionInicial;
-            List<GabNotification> notifications = gson.fromJson(response.getResponseDetail(), new TypeToken<List<GabNotification>>(){}.getType());
+            List<GabNotification> notifications = gson.fromJson(response.getResponseStr(), new TypeToken<List<GabNotification>>(){}.getType());
             if (!notifications.isEmpty()) {
                 log.debug("Se ejecutó la query: " + uri);
                 log.debug("Resultados encontrados: " + notifications.size());
 
-                String linkHeader = response.getResponse().getHeaderString("link");
-                log.debug("Recibí este link: " + linkHeader);
-                minId = this.extractMinId(linkHeader);
-                log.debug("Valor del min_id: " + minId);
+                List<String> linkHeaderList = response.getHttpHeaders().get("link");
+                if ((linkHeaderList != null) && (!linkHeaderList.isEmpty())) {
+                    String linkHeader = linkHeaderList.get(0);
+                    log.debug("Recibí este link: " + linkHeader);
+                    minId = this.extractMinId(linkHeader);
+                    log.debug("Valor del min_id: " + minId);
+                }
             }
 
             // return accounts;
