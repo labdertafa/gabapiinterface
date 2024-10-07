@@ -106,9 +106,6 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             this.client.executeApiRequest(request);
             
             return true;
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
             throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
         }
