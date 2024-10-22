@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
  * @author Rafael
  * @version 1.2
  * @created 12/09/2024
- * @updated 13/10/2024
+ * @updated 22/10/2024
  */
 public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     public GabStatusApiImpl(String accessToken) {
@@ -157,7 +157,6 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
                 }
             }
 
-            // return accounts;
             return new GabStatusListResponse(statuses, newNextPage);
         } catch (JsonSyntaxException e) {
             logException(e);
@@ -181,7 +180,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             
             do {
                 GabStatusListResponse statusListResponse = this.getTimelinePage(uri, okStatus, nextPage);
-                log.info("Elementos recuperados total: " + statusListResponse.getStatuses().size());
+                log.debug("Elementos recuperados total: " + statusListResponse.getStatuses().size());
                 if (statuses == null) {
                     statuses = statusListResponse.getStatuses();
                 } else {
@@ -189,7 +188,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
                 }
                 
                 nextPage = statusListResponse.getNextPage();
-                log.info("getGlobalTimeline. Recuperados: " + statuses.size() + ". Next page: " + nextPage);
+                log.debug("getGlobalTimeline. Recuperados: " + statuses.size() + ". Next page: " + nextPage);
                 if (statusListResponse.getStatuses().isEmpty()) {
                     continuar = false;
                 } else {

@@ -15,13 +15,14 @@ import com.laboratorio.gabapiinterface.model.GabSuggestionType;
 import com.laboratorio.gabapiinterface.model.request.GabRelationshipRequest;
 import com.laboratorio.gabapiinterface.model.response.GabSuggestionsResponse;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
  * @author Rafael
- * @version 1.1
+ * @version 1.2
  * @created 11/09/2024
- * @updated 06/10/2024
+ * @updated 22/10/2024
  */
 public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
     public GabAccountApiImpl(String accessToken) {
@@ -78,6 +79,14 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         InstruccionInfo instruccionInfo = new InstruccionInfo(endpoint, complementoUrl, okStatus, usedLimit);
         return this.getAccountList(instruccionInfo, userId, quantity, posicionInicial);
     }
+    
+    @Override
+    public List<String> getFollowersIds(String userId, int limit) throws Exception {
+        GabAccountListResponse response = this.getFollowers(userId, limit, 0, null);
+        return response.getAccounts().stream()
+                .map(account -> account.getId())
+                .collect(Collectors.toList());
+    }
 
     @Override
     public GabAccountListResponse getFollowings(String userId) throws Exception {
@@ -107,6 +116,14 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         }
         InstruccionInfo instruccionInfo = new InstruccionInfo(endpoint, complementoUrl, okStatus, usedLimit);
         return this.getAccountList(instruccionInfo, userId, quantity, posicionInicial);
+    }
+    
+    @Override
+    public List<String> getFollowingsIds(String userId, int limit) throws Exception {
+        GabAccountListResponse response = this.getFollowings(userId, limit, 0, null);
+        return response.getAccounts().stream()
+                .map(account -> account.getId())
+                .collect(Collectors.toList());
     }
 
     @Override
