@@ -16,17 +16,20 @@ import com.laboratorio.gabapiinterface.GabAccountApi;
 import com.laboratorio.gabapiinterface.model.GabSuggestionType;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 11/09/2024
- * @updated 06/10/2024
+ * @updated 23/10/2024
  */
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class GabAccountApiTest {
+    protected static final Logger log = LogManager.getLogger(GabAccountApiTest.class);
     private static GabAccountApi accountApi;
     
     @BeforeEach
@@ -115,10 +118,22 @@ public class GabAccountApiTest {
     
     @Test
     public void getAllFollowers() throws Exception {     // Usa default limit
-        String id = "5511959";
+       String id = "5511959";
         
         GabAccountListResponse accountListResponse = accountApi.getFollowers(id);
+        log.info("Seguidores encontrados: " + accountListResponse.getAccounts().size());
+        
         assertTrue(!accountListResponse.getAccounts().isEmpty());
+    }
+    
+    @Test
+    public void getFollowersIds() throws Exception {     // Usa default limit
+        String id = "6636039";
+        
+        List<String> usersIds = accountApi.getFollowersIds(id, 0);
+        log.info("Seguidores encontrados: " + usersIds.size());
+        
+        assertTrue(!usersIds.isEmpty());
     }
     
     @Test

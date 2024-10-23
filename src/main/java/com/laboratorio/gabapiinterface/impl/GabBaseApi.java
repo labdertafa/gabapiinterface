@@ -23,7 +23,7 @@ import org.apache.logging.log4j.Logger;
  * @author Rafael
  * @version 1.1
  * @created 11/09/2024
- * @updated 06/11/2024
+ * @updated 23/10/2024
  */
 public class GabBaseApi {
     protected static final Logger log = LogManager.getLogger(GabBaseApi.class);
@@ -144,7 +144,7 @@ public class GabBaseApi {
                         continuar = false;
                     }
                 } else {
-                    if ((max_id == null) || (accountListResponse.getAccounts().size() < limit)) {
+                    if ((max_id == null) || (accountListResponse.getAccounts().isEmpty())) {
                         continuar = false;
                     }
                 }
