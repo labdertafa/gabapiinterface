@@ -1,5 +1,6 @@
 package com.laboratorio.gabapiinterface.model;
 
+import com.laboratorio.gabapiinterface.model.tl.GabGroupStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,9 +9,9 @@ import lombok.Setter;
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 24/07/2024
- * @updated 13/10/2024
+ * @updated 24/10/2024
  */
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
@@ -44,6 +45,24 @@ public class GabStatus {
     private boolean bookmarked;
     private boolean pinned;
     private GabFilterResult[] filtered;
+    
+    public GabStatus(GabGroupStatus status) {
+        this.id = status.getI();
+        this.uri = status.getUl();
+        this.created_at = status.getCa();
+        this.content = status.getC();
+        this.visibility = status.getV();
+        this.sensitive = status.isS();
+        this.spoiler_text = status.getSt();
+        this.reblogs_count = status.getRbc();
+        this.favourites_count = status.getFc();
+        this.replies_count = status.getRc();
+        this.url = status.getU();
+        this.language = status.getL();
+        this.edited_at = status.getCa();
+        this.favourited = status.isFvd();
+        this.reblogged = status.isRbgd();
+    }
 
     @Override
     public String toString() {

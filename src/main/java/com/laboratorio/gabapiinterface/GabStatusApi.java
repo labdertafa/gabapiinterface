@@ -7,9 +7,9 @@ import java.util.List;
 /**
  *
  * @author Rafael
- * @version 1.1
+ * @version 1.2
  * @created 07/09/2024
- * @updated 13/10/2024
+ * @updated 24/10/2024
  */
 public interface GabStatusApi {
     GabStatus postStatus(String text);
@@ -18,5 +18,6 @@ public interface GabStatusApi {
     GabMediaAttachment uploadImage(String filePath);
     boolean deleteStatus(String id);
     
+    List<GabStatus> getPersonalTimeline(int quantity);
     List<GabStatus> getGlobalTimeline(int quantity);
 }

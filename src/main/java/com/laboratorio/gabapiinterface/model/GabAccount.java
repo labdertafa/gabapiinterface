@@ -1,5 +1,6 @@
 package com.laboratorio.gabapiinterface.model;
 
+import com.laboratorio.gabapiinterface.model.tl.GabGroupAccount;
 import com.laboratorio.gabapiinterface.utils.GabApiConfig;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -13,9 +14,9 @@ import lombok.Setter;
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 10/07/2024
- * @updated 13/09/2024
+ * @updated 24/10/2024
  */
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
@@ -46,6 +47,25 @@ public class GabAccount {
     private int statuses_count;
     private int followers_count;
     private int following_count;
+    
+    public GabAccount(GabGroupAccount account) {
+        this.id = account.getI();
+        this.username = account.getUn();
+        this.acct = account.getAc();
+        this.url = account.getU();
+        this.display_name = account.getDn();
+        this.note = account.getNt();
+        this.avatar = account.getAv();
+        this.avatar_static = account.getAvs();
+        this.header = account.getH();
+        this.header_static = account.getHs();
+        this.locked = account.isL();
+        this.indexable = account.isIdn();
+        this.created_at = account.getAc();
+        this.statuses_count = account.getSc();
+        this.followers_count = account.getFoc();
+        this.following_count = account.getFic();
+    }
 
     public boolean isSeguidorPotencial() {
         if (this.locked) {

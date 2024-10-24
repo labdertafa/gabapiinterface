@@ -10,6 +10,7 @@ import com.laboratorio.gabapiinterface.model.GabMediaAttachment;
 import com.laboratorio.gabapiinterface.model.GabStatus;
 import com.laboratorio.gabapiinterface.GabStatusApi;
 import com.laboratorio.gabapiinterface.model.response.GabStatusListResponse;
+import com.laboratorio.gabapiinterface.model.tl.GabGroupsTlResponse;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,9 +18,9 @@ import java.util.regex.Pattern;
 /**
  *
  * @author Rafael
- * @version 1.2
+ * @version 1.3
  * @created 12/09/2024
- * @updated 22/10/2024
+ * @updated 24/10/2024
  */
 public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     public GabStatusApiImpl(String accessToken) {
@@ -129,7 +130,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
         return null;
     }
     
-    private GabStatusListResponse getTimelinePage(String uri, int okStatus, String nextPage) {
+    private GabStatusListResponse getPersonalTimelinePage(String uri, int okStatus, String nextPage) {
         try {
             ApiRequest request;
             if (nextPage == null) {
@@ -167,9 +168,9 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     }
 
     @Override
-    public List<GabStatus> getGlobalTimeline(int quantity) {
-        String endpoint = this.apiConfig.getProperty("getGlobalTimeLine_endpoint");
-        int okStatus = Integer.parseInt(this.apiConfig.getProperty("getGlobalTimeLine_ok_status"));
+    public List<GabStatus> getPersonalTimeline(int quantity) {
+        String endpoint = this.apiConfig.getProperty("getPersonalTimeLine_endpoint");
+        int okStatus = Integer.parseInt(this.apiConfig.getProperty("getPersonalTimeLine_ok_status"));
         
         List<GabStatus> statuses = null;
         boolean continuar = true;
@@ -179,7 +180,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             String uri = endpoint;
             
             do {
-                GabStatusListResponse statusListResponse = this.getTimelinePage(uri, okStatus, nextPage);
+                GabStatusListResponse statusListResponse = this.getPersonalTimelinePage(uri, okStatus, nextPage);
                 log.debug("Elementos recuperados total: " + statusListResponse.getStatuses().size());
                 if (statuses == null) {
                     statuses = statusListResponse.getStatuses();
@@ -193,6 +194,64 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
                     continuar = false;
                 } else {
                     if ((nextPage == null) || (statuses.size() >= quantity)) {
+                        continuar = false;
+                    }
+                }
+            } while (continuar);
+            
+            return statuses.subList(0, Math.min(quantity, statuses.size()));
+        } catch (Exception e) {
+            throw e;
+        }
+    }
+    
+    private GabGroupsTlResponse getTimelinePage(String uri, int okStatus, int pageNum) {
+        try {
+            ApiRequest request;
+            request = new ApiRequest(uri, okStatus, ApiMethodType.GET);
+            request.addApiPathParam("page", Integer.toString(pageNum));
+            request.addApiPathParam("sort_by", "newest");
+            request.addApiHeader("Content-Type", "application/json");
+            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            
+            ApiResponse response = this.client.executeApiRequest(request);
+
+            return this.gson.fromJson(response.getResponseStr(), GabGroupsTlResponse.class);
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
+        } catch (Exception e) {
+            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+        }
+    }
+
+    @Override
+    public List<GabStatus> getGlobalTimeline(int quantity) {
+        String endpoint = this.apiConfig.getProperty("getGlobalTimeLine_endpoint");
+        int okStatus = Integer.parseInt(this.apiConfig.getProperty("getGlobalTimeLine_ok_status"));
+        
+        List<GabStatus> statuses = null;
+        boolean continuar = true;
+        int nextPage = 1;
+        
+        try {
+            String uri = endpoint;
+            
+            do {
+                GabGroupsTlResponse response = this.getTimelinePage(uri, okStatus, nextPage);
+                log.debug("Elementos recuperados en la página: " + response.getS().size());
+                if (statuses == null) {
+                    statuses = response.getStatusList();
+                } else {
+                    statuses.addAll(response.getStatusList());
+                }
+                
+                nextPage++;
+                log.debug("getGlobalTimeline. Recuperados: " + statuses.size() + ". Next page: " + nextPage);
+                if (response.getS().isEmpty()) {
+                    continuar = false;
+                } else {
+                    if (statuses.size() >= quantity) {
                         continuar = false;
                     }
                 }

@@ -18,9 +18,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 /**
  *
  * @author Rafael
- * @version 1.1
+ * @version 1.2
  * @created 12/09/2024
- * @updated 13/10/2024
+ * @updated 24/10/2024
  */
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -79,6 +79,20 @@ public class GabStatusApiTest {
         boolean result = this.statusApi.deleteStatus(postId);
         
         assertTrue(result);
+    }
+    
+    @Test
+    public void getPersonalTimeline() {
+        int quantity = 50;
+        
+        List<GabStatus> statuses = statusApi.getPersonalTimeline(quantity);
+        int i = 0;
+        for (GabStatus status : statuses) {
+            i++;
+            log.info(i + "-) Status: " + status.toString());
+        }
+        
+        assertEquals(quantity, statuses.size());
     }
     
     @Test
