@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 /**
  *
  * @author Rafael
- * @version 1.2
+ * @version 1.3
  * @created 11/09/2024
- * @updated 22/10/2024
+ * @updated 09/01/2025
  */
 public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
     public GabAccountApiImpl(String accessToken) {
@@ -36,6 +36,27 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         
         try {
             String url = endpoint + "/" + userId;
+            ApiRequest request = new ApiRequest(url, okStatus, ApiMethodType.GET);
+            request.addApiHeader("Content-Type", "application/json");
+            
+            ApiResponse response = this.client.executeApiRequest(request);
+            
+            return this.gson.fromJson(response.getResponseStr(), GabAccount.class);
+        } catch (JsonSyntaxException e) {
+            logException(e);
+            throw e;
+        } catch (Exception e) {
+            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+        }
+    }
+    
+    @Override
+    public GabAccount getAccountByUsername(String username) {
+        String endpoint = this.apiConfig.getProperty("getAccountByUsername_endpoint");
+        int okStatus = Integer.parseInt(this.apiConfig.getProperty("getAccountByUsername_ok_status"));
+        
+        try {
+            String url = endpoint + "/" + username;
             ApiRequest request = new ApiRequest(url, okStatus, ApiMethodType.GET);
             request.addApiHeader("Content-Type", "application/json");
             

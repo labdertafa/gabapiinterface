@@ -22,9 +22,9 @@ import org.apache.logging.log4j.Logger;
 /**
  *
  * @author Rafael
- * @version 1.1
+ * @version 1.2
  * @created 11/09/2024
- * @updated 23/10/2024
+ * @updated 09/01/2025
  */
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -53,6 +53,24 @@ public class GabAccountApiTest {
         
         assertThrows(GabApiException.class, () -> {
             accountApi.getAccountById(id);
+        });
+    }
+    
+    @Test
+    public void getAccountByUsername() {
+        String username = "TruthriseswithLove";
+        
+        GabAccount account = accountApi.getAccountByUsername(username);
+        
+        assertEquals(username, account.getUsername());
+    }
+    
+    @Test
+    public void getAccountByInvalidUsername() {
+        String username = "TruthriseswithLoveXX";
+        
+        assertThrows(GabApiException.class, () -> {
+            accountApi.getAccountByUsername(username);
         });
     }
     

@@ -9,12 +9,13 @@ import java.util.List;
 /**
  *
  * @author Rafael
- * @version 1.1
+ * @version 1.2
  * @created 05/09/2024
- * @updated 22/10/2024
+ * @updated 09/01/2025
  */
 public interface GabAccountApi {
     GabAccount getAccountById(String userId);
+    GabAccount getAccountByUsername(String username);
     
     GabAccountListResponse getFollowers(String userId) throws Exception;
     GabAccountListResponse getFollowers(String userId, int limit) throws Exception;
