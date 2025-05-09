@@ -1,7 +1,7 @@
 package com.laboratorio.gabapiinterface.model;
 
+import com.laboratorio.clientapilibrary.utils.ReaderConfig;
 import com.laboratorio.gabapiinterface.model.tl.GabGroupAccount;
-import com.laboratorio.gabapiinterface.utils.GabApiConfig;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -16,7 +16,7 @@ import lombok.Setter;
  * @author Rafael
  * @version 1.1
  * @created 10/07/2024
- * @updated 24/10/2024
+ * @updated 09/05/2025
  */
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
@@ -87,7 +87,7 @@ public class GabAccount {
             } catch (Exception e) {
                 return false;
             }
-            GabApiConfig config = GabApiConfig.getInstance();
+            ReaderConfig config = new ReaderConfig("config//gab_api.properties");
             int maxInactividad = Integer.parseInt(config.getProperty("dias_inactividad_cuenta"));
             long nDays = ChronoUnit.DAYS.between(ultimaActividad, LocalDate.now());
             return Math.abs(nDays) <= maxInactividad;
@@ -101,7 +101,7 @@ public class GabAccount {
             return false;
         }
         
-        GabApiConfig config = GabApiConfig.getInstance();
+        ReaderConfig config = new ReaderConfig("config//gab_api.properties");
         int umbral = Integer.parseInt(config.getProperty("umbral_fuente_seguidores"));
         return this.followers_count >= umbral;
     }

@@ -7,10 +7,10 @@ import com.laboratorio.clientapilibrary.ApiClient;
 import com.laboratorio.clientapilibrary.model.ApiMethodType;
 import com.laboratorio.clientapilibrary.model.ApiRequest;
 import com.laboratorio.clientapilibrary.model.ApiResponse;
+import com.laboratorio.clientapilibrary.utils.ReaderConfig;
 import com.laboratorio.gabapiinterface.exception.GabApiException;
 import com.laboratorio.gabapiinterface.model.GabAccount;
 import com.laboratorio.gabapiinterface.model.response.GabAccountListResponse;
-import com.laboratorio.gabapiinterface.utils.GabApiConfig;
 import com.laboratorio.gabapiinterface.utils.InstruccionInfo;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -23,19 +23,19 @@ import org.apache.logging.log4j.Logger;
  * @author Rafael
  * @version 1.1
  * @created 11/09/2024
- * @updated 23/10/2024
+ * @updated 09/05/2025
  */
 public class GabBaseApi {
     protected static final Logger log = LogManager.getLogger(GabBaseApi.class);
     protected final ApiClient client;
     protected final String accessToken;
-    protected GabApiConfig apiConfig;
+    protected ReaderConfig apiConfig;
     protected final Gson gson;
     
     public GabBaseApi(String accessToken) {
         this.client = new ApiClient();
         this.accessToken = accessToken;
-        this.apiConfig = GabApiConfig.getInstance();
+        this.apiConfig = new ReaderConfig("config//gab_api.properties");
         this.gson = new Gson();
     }
     

@@ -1,11 +1,11 @@
 package com.laboratorio.api;
 
+import com.laboratorio.clientapilibrary.utils.ReaderConfig;
 import com.laboratorio.gabapiinterface.exception.GabApiException;
 import com.laboratorio.gabapiinterface.impl.GabAccountApiImpl;
 import com.laboratorio.gabapiinterface.model.GabAccount;
 import com.laboratorio.gabapiinterface.model.GabRelationship;
 import com.laboratorio.gabapiinterface.model.response.GabAccountListResponse;
-import com.laboratorio.gabapiinterface.utils.GabApiConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
  * @author Rafael
  * @version 1.2
  * @created 11/09/2024
- * @updated 09/01/2025
+ * @updated 09/05/2025
  */
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -34,7 +34,8 @@ public class GabAccountApiTest {
     
     @BeforeEach
     public void initTest() {
-        String accessToken = GabApiConfig.getInstance().getProperty("access_token");
+        ReaderConfig config = new ReaderConfig("config//gab_api.properties");
+        String accessToken = config.getProperty("access_token");
         accountApi = new GabAccountApiImpl(accessToken);
     }
     

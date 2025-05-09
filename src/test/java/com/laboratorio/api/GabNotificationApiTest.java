@@ -1,9 +1,9 @@
 package com.laboratorio.api;
 
+import com.laboratorio.clientapilibrary.utils.ReaderConfig;
 import com.laboratorio.gabapiinterface.exception.GabApiException;
 import com.laboratorio.gabapiinterface.impl.GabNotificationApiImpl;
 import com.laboratorio.gabapiinterface.model.response.GabNotificationListResponse;
-import com.laboratorio.gabapiinterface.utils.GabApiConfig;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,14 +14,15 @@ import com.laboratorio.gabapiinterface.GabNotificationApi;
  * @author Rafael
  * @version 1.0
  * @created 11/09/2024
- * @updated 11/09/2024
+ * @updated 09/05/2025
  */
 public class GabNotificationApiTest {
     private GabNotificationApi notificationApi;
     
     @BeforeEach
     private void initNotificationApi() {
-        String accessToken = GabApiConfig.getInstance().getProperty("access_token");
+        ReaderConfig config = new ReaderConfig("config//gab_api.properties");
+        String accessToken = config.getProperty("access_token");
         this.notificationApi = new GabNotificationApiImpl(accessToken);
     }
     
