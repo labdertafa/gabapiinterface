@@ -1,6 +1,5 @@
 package com.laboratorio.gabapiinterface.impl;
 
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.laboratorio.clientapilibrary.model.ApiMethodType;
 import com.laboratorio.clientapilibrary.model.ApiRequest;
@@ -20,9 +19,9 @@ import java.util.stream.Collectors;
 /**
  *
  * @author Rafael
- * @version 1.3
+ * @version 1.4
  * @created 11/09/2024
- * @updated 09/01/2025
+ * @updated 06/06/2025
  */
 public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
     public GabAccountApiImpl(String accessToken) {
@@ -40,13 +39,11 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             request.addApiHeader("Content-Type", "application/json");
             
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response getAccountById: {}", response.getResponseStr());
             
             return this.gson.fromJson(response.getResponseStr(), GabAccount.class);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error recuperando los datos de la cuenta Gab con id: " + userId, e);
         }
     }
     
@@ -61,13 +58,11 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             request.addApiHeader("Content-Type", "application/json");
             
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response getAccountByUsername: {}", response.getResponseStr());
             
             return this.gson.fromJson(response.getResponseStr(), GabAccount.class);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error recuperando los datos de la cuenta Gab con username: " + username, e);
         }
     }
 
@@ -161,14 +156,12 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response followAccount: {}", response.getResponseStr());
             GabRelationship relationship = this.gson.fromJson(response.getResponseStr(), GabRelationship.class);
             
             return relationship.isFollowing();
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error siguiendo la cuenta Gab con id: " + userId, e);
         }
     }
 
@@ -186,14 +179,12 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response unfollowAccount: {}", response.getResponseStr());
             GabRelationship relationship = this.gson.fromJson(response.getResponseStr(), GabRelationship.class);
             
             return !relationship.isFollowing();
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error dejando de seguir la cuenta Gab con id: " + userId, e);
         }
     }
 
@@ -213,13 +204,11 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response checkrelationships: {}", response.getResponseStr());
             
             return this.gson.fromJson(response.getResponseStr(), new TypeToken<List<GabRelationship>>(){}.getType());
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error verificando las relaciones con cuentas Gab", e);
         }
     }
 
@@ -242,11 +231,8 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             log.debug("Cuentas sugeridas encontradas: " + suggestionsResponse.getAccounts().size());
             
             return suggestionsResponse.getAccounts();
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error recuperando las sugerencias de seguimiento de Gab", e);
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.laboratorio.gabapiinterface.impl;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.laboratorio.clientapilibrary.ApiClient;
 import com.laboratorio.clientapilibrary.model.ApiMethodType;
@@ -23,7 +22,7 @@ import org.apache.logging.log4j.Logger;
  * @author Rafael
  * @version 1.1
  * @created 11/09/2024
- * @updated 09/05/2025
+ * @updated 06/06/2025
  */
 public class GabBaseApi {
     protected static final Logger log = LogManager.getLogger(GabBaseApi.class);
@@ -37,13 +36,6 @@ public class GabBaseApi {
         this.accessToken = accessToken;
         this.apiConfig = new ReaderConfig("config//gab_api.properties");
         this.gson = new Gson();
-    }
-    
-    protected void logException(Exception e) {
-        log.error("Error: " + e.getMessage());
-        if (e.getCause() != null) {
-            log.error("Causa: " + e.getCause().getMessage());
-        }
     }
     
     // Función que extrae el max_id de la respuesta
@@ -105,11 +97,8 @@ public class GabBaseApi {
 
             // return accounts;
             return new GabAccountListResponse(maxId, accounts);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabBaseApi.class.getName(), e.getMessage());
+            throw new GabApiException("Error recuperando una página de usuarios Gab: " + uri, e);
         }
     }
     

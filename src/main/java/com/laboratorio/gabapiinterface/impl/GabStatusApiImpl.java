@@ -18,9 +18,9 @@ import java.util.regex.Pattern;
 /**
  *
  * @author Rafael
- * @version 1.3
+ * @version 1.4
  * @created 12/09/2024
- * @updated 24/10/2024
+ * @updated 06/06/2025
  */
 public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     public GabStatusApiImpl(String accessToken) {
@@ -51,28 +51,22 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response postStatusWithImage: {}", response.getResponseStr());
             
             return this.gson.fromJson(response.getResponseStr(), GabStatus.class);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error posteando un estado en gab: " + text, e);
         }
     }
     
     @Override
     public GabStatus postStatus(String text, String filePath) {
-        try {
-            if (filePath != null) {
-                GabMediaAttachment mediaAttachment = this.uploadImage(filePath);
-                return this.postStatusWithImage(text, mediaAttachment);
-            }
-            
-            return this.postStatusWithImage(text, null);
-        } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+        if (filePath != null) {
+            GabMediaAttachment mediaAttachment = this.uploadImage(filePath);
+            return this.postStatusWithImage(text, mediaAttachment);
         }
+
+        return this.postStatusWithImage(text, null);
     }
 
     @Override
@@ -89,13 +83,11 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             request.addFileFormData("file", filePath);
                         
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response uploadImage: {}", response.getResponseStr());
             
             return this.gson.fromJson(response.getResponseStr(), GabMediaAttachment.class);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error subiendo una imagen a gab: " + filePath, e);
         }
     }
 
@@ -113,7 +105,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             
             return true;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error eliminado el estado en gab con id: " + id, e);
         }
     }
     
@@ -159,11 +151,8 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             }
 
             return new GabStatusListResponse(statuses, newNextPage);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error recuperando una página del Timeline personal de Gab", e);
         }
     }
 
@@ -215,13 +204,11 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
+            log.debug("Response getTimelinePage: {}", response.getResponseStr());
 
             return this.gson.fromJson(response.getResponseStr(), GabGroupsTlResponse.class);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabAccountApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error recuperando una página del Timeline global de Gab", e);
         }
     }
 

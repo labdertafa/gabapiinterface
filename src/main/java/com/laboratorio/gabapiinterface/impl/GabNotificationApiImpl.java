@@ -16,7 +16,7 @@ import com.laboratorio.gabapiinterface.GabNotificationApi;
  * @author Rafael
  * @version 1.1
  * @created 11/09/2024
- * @updated 06/10/2024
+ * @updated 06/06/2025
  */
 public class GabNotificationApiImpl extends GabBaseApi implements GabNotificationApi {
     public GabNotificationApiImpl(String accessToken) {
@@ -67,11 +67,8 @@ public class GabNotificationApiImpl extends GabBaseApi implements GabNotificatio
 
             // return accounts;
             return new GabNotificationListResponse(minId, notifications);
-        } catch (JsonSyntaxException e) {
-            logException(e);
-            throw e;
         } catch (Exception e) {
-            throw new GabApiException(GabNotificationApiImpl.class.getName(), e.getMessage());
+            throw new GabApiException("Error recuperando una página de notificaciones de Gab", e);
         }
     }
 

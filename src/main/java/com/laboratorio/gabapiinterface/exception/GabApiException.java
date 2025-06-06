@@ -1,20 +1,30 @@
 package com.laboratorio.gabapiinterface.exception;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  *
  * @author Rafael
- * @version 1.0
+ * @version 1.1
  * @created 10/07/2024
- * @updated 10/07/2024
+ * @updated 06/06/2025
  */
 public class GabApiException extends RuntimeException {
-    private static final Logger log = LogManager.getLogger(GabApiException.class);
+    private Throwable causaOriginal = null;
     
-    public GabApiException(String className, String message) {
+    public GabApiException(String message) {
         super(message);
-        log.error(String.format("Error %s: %s", className, message));
+    }
+    
+    public GabApiException(String message, Throwable causaOriginal) {
+        super(message);
+        this.causaOriginal = causaOriginal;
+    }
+    
+    @Override
+    public String getMessage() {
+        if (this.causaOriginal != null) {
+            return super.getMessage() + " | Causa original: " + this.causaOriginal.getMessage();
+        }
+        
+        return super.getMessage();
     }
 }
