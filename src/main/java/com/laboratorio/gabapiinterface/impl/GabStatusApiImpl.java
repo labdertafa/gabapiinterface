@@ -20,11 +20,22 @@ import java.util.regex.Pattern;
  * @author Rafael
  * @version 1.4
  * @created 12/09/2024
- * @updated 06/06/2025
+ * @updated 03/11/2025
  */
 public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     public GabStatusApiImpl(String accessToken) {
         super(accessToken);
+    }
+    
+    private ApiRequest addNavigatorHeaders(ApiRequest request) {
+        request.addApiHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+        request.addApiHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7");
+        request.addApiHeader("Accept-Language", "en-US,en;q=0.9");
+        request.addApiHeader("Accept-Encoding", "gzip, deflate, br");
+        request.addApiHeader("Referer", "https://gab.com/");
+        request.addApiHeader("Upgrade-Insecure-Requests", "1");
+        
+        return request;
     }
 
     @Override
@@ -49,6 +60,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request = this.addNavigatorHeaders(request);
             
             ApiResponse response = this.client.executeApiRequest(request);
             log.debug("Response postStatusWithImage: {}", response.getResponseStr());
@@ -78,8 +90,8 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             String uri = endpoint;
             
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
-            request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request = this.addNavigatorHeaders(request);
             request.addFileFormData("file", filePath);
                         
             ApiResponse response = this.client.executeApiRequest(request);
@@ -100,6 +112,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             String uri = endpoint + "/" + id;
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.DELETE);
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request = this.addNavigatorHeaders(request);
             
             this.client.executeApiRequest(request);
             
@@ -132,6 +145,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             }
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request = this.addNavigatorHeaders(request);
             
             ApiResponse response = this.client.executeApiRequest(request);
             
@@ -202,6 +216,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             request.addApiPathParam("sort_by", "newest");
             request.addApiHeader("Content-Type", "application/json");
             request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request = this.addNavigatorHeaders(request);
             
             ApiResponse response = this.client.executeApiRequest(request);
             log.debug("Response getTimelinePage: {}", response.getResponseStr());
