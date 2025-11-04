@@ -20,9 +20,9 @@ import org.apache.logging.log4j.Logger;
 /**
  *
  * @author Rafael
- * @version 1.1
+ * @version 1.2
  * @created 11/09/2024
- * @updated 06/06/2025
+ * @updated 03/11/2025
  */
 public class GabBaseApi {
     protected static final Logger log = LogManager.getLogger(GabBaseApi.class);
@@ -32,9 +32,12 @@ public class GabBaseApi {
     protected final Gson gson;
     
     public GabBaseApi(String accessToken) {
-        this.client = new ApiClient();
-        this.accessToken = accessToken;
         this.apiConfig = new ReaderConfig("config//gab_api.properties");
+        String proxyDNS = this.apiConfig.getProperty("gab_proxy_dns");
+        int proxyPort = Integer.parseInt(this.apiConfig.getProperty("gab_proxy_port"));
+        String certificatePath = this.apiConfig.getProperty("gab_proxy_certificate");
+        this.client = new ApiClient(proxyDNS, proxyPort, certificatePath);
+        this.accessToken = accessToken;
         this.gson = new Gson();
     }
     
