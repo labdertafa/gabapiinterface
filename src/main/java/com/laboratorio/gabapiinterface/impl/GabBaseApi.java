@@ -20,9 +20,9 @@ import org.apache.logging.log4j.Logger;
 /**
  *
  * @author Rafael
- * @version 1.2
+ * @version 1.3
  * @created 11/09/2024
- * @updated 03/11/2025
+ * @updated 10/12/2025
  */
 public class GabBaseApi {
     protected static final Logger log = LogManager.getLogger(GabBaseApi.class);
@@ -33,10 +33,16 @@ public class GabBaseApi {
     
     public GabBaseApi(String accessToken) {
         this.apiConfig = new ReaderConfig("config//gab_api.properties");
-        String proxyDNS = this.apiConfig.getProperty("gab_proxy_dns");
-        int proxyPort = Integer.parseInt(this.apiConfig.getProperty("gab_proxy_port"));
+        String proxyHost = this.apiConfig.getProperty("gab_proxy_host");
+        String proxyPortStr = this.apiConfig.getProperty("gab_proxy_port");
         String certificatePath = this.apiConfig.getProperty("gab_proxy_certificate");
-        this.client = new ApiClient(proxyDNS, proxyPort, certificatePath);
+        if (proxyHost != null && !proxyHost.isBlank() && proxyPortStr != null && !proxyPortStr.isBlank()
+                && certificatePath != null && !certificatePath.isBlank()) {
+            int proxyPort = Integer.parseInt(proxyPortStr);
+            this.client = new ApiClient(proxyHost, proxyPort, certificatePath);
+        } else {
+            this.client = new ApiClient();
+        }
         this.accessToken = accessToken;
         this.gson = new Gson();
     }
@@ -70,7 +76,7 @@ public class GabBaseApi {
     }
     
     // Función que devuelve una página de seguidores o seguidos de una cuenta
-    private GabAccountListResponse getAccountPage(String uri, int okStatus, int limit, String posicionInicial) throws Exception {
+    private GabAccountListResponse getAccountPage(String uri, int okStatus, int limit, String posicionInicial) throws GabApiException {
         try {
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.GET);
             request.addApiPathParam("limit", Integer.toString(limit));
@@ -98,21 +104,21 @@ public class GabBaseApi {
                 }
             }
 
-            // return accounts;
             return new GabAccountListResponse(maxId, accounts);
         } catch (Exception e) {
             throw new GabApiException("Error recuperando una página de usuarios Gab: " + uri, e);
         }
     }
     
-    protected GabAccountListResponse getAccountList(InstruccionInfo instruccionInfo, String userId, int quantity, String posicionInicial) throws Exception {
+    protected GabAccountListResponse getAccountList(InstruccionInfo instruccionInfo, String userId,
+            int quantity, String posicionInicial) throws GabApiException{
         List<GabAccount> accounts = null;
         boolean continuar = true;
         String endpoint = instruccionInfo.getEndpoint();
         String complemento = instruccionInfo.getComplementoUrl();
         int limit = instruccionInfo.getLimit();
         int okStatus = instruccionInfo.getOkStatus();
-        String max_id = posicionInicial;
+        String maxId = posicionInicial;
         
         if (quantity > 0) {
             limit = Math.min(limit, quantity);
@@ -120,35 +126,31 @@ public class GabBaseApi {
         
         String uri = endpoint + "/" + userId + "/" + complemento;
         
-        try {
-            do {
-                GabAccountListResponse accountListResponse = this.getAccountPage(uri, okStatus, limit, max_id);
-                if (accounts == null) {
-                    accounts = accountListResponse.getAccounts();
-                } else {
-                    accounts.addAll(accountListResponse.getAccounts());
-                }
-                
-                max_id = accountListResponse.getMaxId();
-                log.debug("getMastodonAccountList. Cantidad: " + quantity + ". Recuperados: " + accounts.size() + ". Max_id: " + max_id);
-                if (quantity > 0) {
-                    if ((accounts.size() >= quantity) || (max_id == null)) {
-                        continuar = false;
-                    }
-                } else {
-                    if ((max_id == null) || (accountListResponse.getAccounts().isEmpty())) {
-                        continuar = false;
-                    }
-                }
-            } while (continuar);
-
-            if (quantity == 0) {
-                return new GabAccountListResponse(max_id, accounts);
+        do {
+            GabAccountListResponse accountListResponse = this.getAccountPage(uri, okStatus, limit, maxId);
+            if (accounts == null) {
+                accounts = accountListResponse.getAccounts();
+            } else {
+                accounts.addAll(accountListResponse.getAccounts());
             }
-            
-            return new GabAccountListResponse(max_id, accounts.subList(0, Math.min(quantity, accounts.size())));
-        } catch (Exception e) {
-            throw e;
+
+            maxId = accountListResponse.getMaxId();
+            log.debug("getMastodonAccountList. Cantidad: " + quantity + ". Recuperados: " + accounts.size() + ". Max_id: " + maxId);
+            if (quantity > 0) {
+                if ((accounts.size() >= quantity) || (maxId == null)) {
+                    continuar = false;
+                }
+            } else {
+                if ((maxId == null) || (accountListResponse.getAccounts().isEmpty())) {
+                    continuar = false;
+                }
+            }
+        } while (continuar);
+
+        if (quantity == 0) {
+            return new GabAccountListResponse(maxId, accounts);
         }
+
+        return new GabAccountListResponse(maxId, accounts.subList(0, Math.min(quantity, accounts.size())));
     }
 }
