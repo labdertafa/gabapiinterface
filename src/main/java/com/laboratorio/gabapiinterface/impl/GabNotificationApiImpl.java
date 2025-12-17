@@ -13,9 +13,9 @@ import com.laboratorio.gabapiinterface.GabNotificationApi;
 /**
  *
  * @author Rafael
- * @version 1.1
+ * @version 1.2
  * @created 11/09/2024
- * @updated 06/06/2025
+ * @updated 17/12/2025
  */
 public class GabNotificationApiImpl extends GabBaseApi implements GabNotificationApi {
     public GabNotificationApiImpl(String accessToken) {
@@ -64,11 +64,30 @@ public class GabNotificationApiImpl extends GabBaseApi implements GabNotificatio
                 }
             }
 
-            // return accounts;
             return new GabNotificationListResponse(minId, notifications);
         } catch (Exception e) {
             throw new GabApiException("Error recuperando una página de notificaciones de Gab", e);
         }
+    }
+    
+    private boolean isContinuar(int quantity, List<GabNotification> notifications, String minId,
+            GabNotificationListResponse notificationListResponse, int usedLimit) {
+        log.debug("getFollowers. Cantidad: " + quantity + ". Recuperados: " + notifications.size() + ". Min_id: " + minId);
+        if (notificationListResponse.getNotifications().isEmpty()) {
+            return false;
+        } else {
+            if (quantity > 0) {
+                if (notifications.size() >= quantity) {
+                    return false;
+                }
+            } else {
+                if (notificationListResponse.getNotifications().size() < usedLimit) {
+                    return false;
+                }
+            }
+        }
+            
+        return true;
     }
 
     @Override
@@ -82,49 +101,32 @@ public class GabNotificationApiImpl extends GabBaseApi implements GabNotificatio
             usedLimit = defaultLimit;
         }
         List<GabNotification> notifications = null;
-        boolean continuar = true;
-        String min_id = "0";
+        boolean continuar;
+        String minId = "0";
         if (posicionInicial != null) {
-            min_id = posicionInicial;
+            minId = posicionInicial;
         }
         
         if (quantity > 0) {
             usedLimit = Math.min(usedLimit, quantity);
         }
         
-        try {
-            do {
-                GabNotificationListResponse notificationListResponse = this.getNotificationPage(endpoint, usedLimit, okStatus, min_id);
-                if (notifications == null) {
-                    notifications = notificationListResponse.getNotifications();
-                } else {
-                    notifications.addAll(notificationListResponse.getNotifications());
-                }
-                
-                min_id = notificationListResponse.getMinId();
-                log.debug("getFollowers. Cantidad: " + quantity + ". Recuperados: " + notifications.size() + ". Min_id: " + min_id);
-                if (notificationListResponse.getNotifications().isEmpty()) {
-                    continuar = false;
-                } else {
-                    if (quantity > 0) {
-                        if (notifications.size() >= quantity) {
-                            continuar = false;
-                        }
-                    } else {
-                        if (notificationListResponse.getNotifications().size() < usedLimit) {
-                            continuar = false;
-                        }
-                    }
-                }
-            } while (continuar);
-
-            if (quantity == 0) {
-                return new GabNotificationListResponse(min_id, notifications);
+        do {
+            GabNotificationListResponse notificationListResponse = this.getNotificationPage(endpoint, usedLimit, okStatus, minId);
+            if (notifications == null) {
+                notifications = notificationListResponse.getNotifications();
+            } else {
+                notifications.addAll(notificationListResponse.getNotifications());
             }
-            
-            return new GabNotificationListResponse(min_id, notifications.subList(0, Math.min(quantity, notifications.size())));
-        } catch (Exception e) {
-            throw e;
+
+            minId = notificationListResponse.getMinId();
+            continuar = this.isContinuar(quantity, notifications, minId, notificationListResponse, usedLimit);
+        } while (continuar);
+
+        if (quantity == 0) {
+            return new GabNotificationListResponse(minId, notifications);
         }
+
+        return new GabNotificationListResponse(minId, notifications.subList(0, Math.min(quantity, notifications.size())));
     }
 }

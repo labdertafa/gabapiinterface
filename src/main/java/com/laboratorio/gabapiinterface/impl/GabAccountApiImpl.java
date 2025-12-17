@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 /**
  *
  * @author Rafael
- * @version 1.4
+ * @version 1.5
  * @created 11/09/2024
- * @updated 06/06/2025
+ * @updated 17/12/2025
  */
 public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
     public GabAccountApiImpl(String accessToken) {
@@ -36,7 +36,7 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         try {
             String url = endpoint + "/" + userId;
             ApiRequest request = new ApiRequest(url, okStatus, ApiMethodType.GET);
-            request.addApiHeader("Content-Type", "application/json");
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
             
             ApiResponse response = this.client.executeApiRequest(request);
             log.debug("Response getAccountById: {}", response.getResponseStr());
@@ -55,7 +55,7 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         try {
             String url = endpoint + "/" + username;
             ApiRequest request = new ApiRequest(url, okStatus, ApiMethodType.GET);
-            request.addApiHeader("Content-Type", "application/json");
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
             
             ApiResponse response = this.client.executeApiRequest(request);
             log.debug("Response getAccountByUsername: {}", response.getResponseStr());
@@ -152,8 +152,8 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             String uri = endpoint + "/" + userId + "/" + complementoUrl;
             
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
-            request.addApiHeader("Content-Type", "application/json");
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
             log.debug("Response followAccount: {}", response.getResponseStr());
@@ -175,8 +175,8 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             String uri = endpoint + "/" + userId + "/" + complementoUrl;
 
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
-            request.addApiHeader("Content-Type", "application/json");
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
             log.debug("Response unfollowAccount: {}", response.getResponseStr());
@@ -200,8 +200,8 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
             String uri = endpoint;
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST, requestJson);
             
-            request.addApiHeader("Content-Type", "application/json");
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             
             ApiResponse response = this.client.executeApiRequest(request);
             log.debug("Response checkrelationships: {}", response.getResponseStr());
@@ -220,10 +220,9 @@ public class GabAccountApiImpl extends GabBaseApi implements GabAccountApi {
         try {
             String uri = endpoint + "?type=" + type.name().toLowerCase();
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.GET);
-            // request.addApiHeader("type", type.name().toLowerCase());
             
-            request.addApiHeader("Content-Type", "application/json");
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
 
             ApiResponse response = this.client.executeApiRequest(request);
             GabSuggestionsResponse suggestionsResponse = this.gson.fromJson(response.getResponseStr(), GabSuggestionsResponse.class);

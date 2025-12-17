@@ -20,11 +20,16 @@ import org.apache.logging.log4j.Logger;
 /**
  *
  * @author Rafael
- * @version 1.3
+ * @version 1.4
  * @created 11/09/2024
- * @updated 10/12/2025
+ * @updated 17/12/2025
  */
 public class GabBaseApi {
+    protected static final String CONTENT_TYPE = "Content-Type";
+    protected static final String APPLICATION_JSON = "application/json";
+    protected static final String AUTHORIZATION = "Authorization";
+    protected static final String BEARER = "Bearer ";
+    
     protected static final Logger log = LogManager.getLogger(GabBaseApi.class);
     protected final ApiClient client;
     protected final String accessToken;
@@ -110,10 +115,26 @@ public class GabBaseApi {
         }
     }
     
+    private boolean isContinuar(int quantity, List<GabAccount> accounts, String maxId,
+            GabAccountListResponse accountListResponse) {
+        log.debug("getMastodonAccountList. Cantidad: " + quantity + ". Recuperados: " + accounts.size() + ". Max_id: " + maxId);
+        if (quantity > 0) {
+            if ((accounts.size() >= quantity) || (maxId == null)) {
+                return false;
+            }
+        } else {
+            if ((maxId == null) || (accountListResponse.getAccounts().isEmpty())) {
+                return false;
+            }
+        }
+        
+        return true;
+    } 
+    
     protected GabAccountListResponse getAccountList(InstruccionInfo instruccionInfo, String userId,
             int quantity, String posicionInicial) throws GabApiException{
         List<GabAccount> accounts = null;
-        boolean continuar = true;
+        boolean continuar;
         String endpoint = instruccionInfo.getEndpoint();
         String complemento = instruccionInfo.getComplementoUrl();
         int limit = instruccionInfo.getLimit();
@@ -135,16 +156,7 @@ public class GabBaseApi {
             }
 
             maxId = accountListResponse.getMaxId();
-            log.debug("getMastodonAccountList. Cantidad: " + quantity + ". Recuperados: " + accounts.size() + ". Max_id: " + maxId);
-            if (quantity > 0) {
-                if ((accounts.size() >= quantity) || (maxId == null)) {
-                    continuar = false;
-                }
-            } else {
-                if ((maxId == null) || (accountListResponse.getAccounts().isEmpty())) {
-                    continuar = false;
-                }
-            }
+            continuar = this.isContinuar(quantity, accounts, maxId, accountListResponse);
         } while (continuar);
 
         if (quantity == 0) {

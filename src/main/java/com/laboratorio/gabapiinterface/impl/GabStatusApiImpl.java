@@ -1,6 +1,5 @@
 package com.laboratorio.gabapiinterface.impl;
 
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.laboratorio.clientapilibrary.model.ApiMethodType;
 import com.laboratorio.clientapilibrary.model.ApiRequest;
@@ -18,9 +17,9 @@ import java.util.regex.Pattern;
 /**
  *
  * @author Rafael
- * @version 1.4
+ * @version 1.5
  * @created 12/09/2024
- * @updated 03/11/2025
+ * @updated 17/12/2025
  */
 public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
     public GabStatusApiImpl(String accessToken) {
@@ -58,8 +57,8 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
                 request.addApiPathParam("media_ids[]", mediaAttachment.getId());
             }
             
-            request.addApiHeader("Content-Type", "application/json");
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             request = this.addNavigatorHeaders(request);
             
             ApiResponse response = this.client.executeApiRequest(request);
@@ -90,7 +89,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             String uri = endpoint;
             
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.POST);
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             request = this.addNavigatorHeaders(request);
             request.addFileFormData("file", filePath);
                         
@@ -111,7 +110,7 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
         try {
             String uri = endpoint + "/" + id;
             ApiRequest request = new ApiRequest(uri, okStatus, ApiMethodType.DELETE);
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             request = this.addNavigatorHeaders(request);
             
             this.client.executeApiRequest(request);
@@ -143,8 +142,8 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             } else {
                 request = new ApiRequest(nextPage, okStatus, ApiMethodType.GET);
             }
-            request.addApiHeader("Content-Type", "application/json");
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             request = this.addNavigatorHeaders(request);
             
             ApiResponse response = this.client.executeApiRequest(request);
@@ -177,35 +176,30 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
         
         List<GabStatus> statuses = null;
         boolean continuar = true;
-        String nextPage = null;
-        
-        try {
-            String uri = endpoint;
-            
-            do {
-                GabStatusListResponse statusListResponse = this.getPersonalTimelinePage(uri, okStatus, nextPage);
-                log.debug("Elementos recuperados total: " + statusListResponse.getStatuses().size());
-                if (statuses == null) {
-                    statuses = statusListResponse.getStatuses();
-                } else {
-                    statuses.addAll(statusListResponse.getStatuses());
-                }
-                
-                nextPage = statusListResponse.getNextPage();
-                log.debug("getGlobalTimeline. Recuperados: " + statuses.size() + ". Next page: " + nextPage);
-                if (statusListResponse.getStatuses().isEmpty()) {
+        String nextPage = null;        
+        String uri = endpoint;
+
+        do {
+            GabStatusListResponse statusListResponse = this.getPersonalTimelinePage(uri, okStatus, nextPage);
+            log.debug("Elementos recuperados total: " + statusListResponse.getStatuses().size());
+            if (statuses == null) {
+                statuses = statusListResponse.getStatuses();
+            } else {
+                statuses.addAll(statusListResponse.getStatuses());
+            }
+
+            nextPage = statusListResponse.getNextPage();
+            log.debug("getGlobalTimeline. Recuperados: " + statuses.size() + ". Next page: " + nextPage);
+            if (statusListResponse.getStatuses().isEmpty()) {
+                continuar = false;
+            } else {
+                if ((nextPage == null) || (statuses.size() >= quantity)) {
                     continuar = false;
-                } else {
-                    if ((nextPage == null) || (statuses.size() >= quantity)) {
-                        continuar = false;
-                    }
                 }
-            } while (continuar);
-            
-            return statuses.subList(0, Math.min(quantity, statuses.size()));
-        } catch (Exception e) {
-            throw e;
-        }
+            }
+        } while (continuar);
+
+        return statuses.subList(0, Math.min(quantity, statuses.size()));
     }
     
     private GabGroupsTlResponse getTimelinePage(String uri, int okStatus, int pageNum) {
@@ -214,8 +208,8 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
             request = new ApiRequest(uri, okStatus, ApiMethodType.GET);
             request.addApiPathParam("page", Integer.toString(pageNum));
             request.addApiPathParam("sort_by", "newest");
-            request.addApiHeader("Content-Type", "application/json");
-            request.addApiHeader("Authorization", "Bearer " + this.accessToken);
+            request.addApiHeader(CONTENT_TYPE, APPLICATION_JSON);
+            request.addApiHeader(AUTHORIZATION, BEARER + this.accessToken);
             request = this.addNavigatorHeaders(request);
             
             ApiResponse response = this.client.executeApiRequest(request);
@@ -234,34 +228,29 @@ public class GabStatusApiImpl extends GabBaseApi implements GabStatusApi {
         
         List<GabStatus> statuses = null;
         boolean continuar = true;
-        int nextPage = 1;
-        
-        try {
-            String uri = endpoint;
-            
-            do {
-                GabGroupsTlResponse response = this.getTimelinePage(uri, okStatus, nextPage);
-                log.debug("Elementos recuperados en la página: " + response.getS().size());
-                if (statuses == null) {
-                    statuses = response.getStatusList();
-                } else {
-                    statuses.addAll(response.getStatusList());
-                }
-                
-                nextPage++;
-                log.debug("getGlobalTimeline. Recuperados: " + statuses.size() + ". Next page: " + nextPage);
-                if (response.getS().isEmpty()) {
+        int nextPage = 1;        
+        String uri = endpoint;
+
+        do {
+            GabGroupsTlResponse response = this.getTimelinePage(uri, okStatus, nextPage);
+            log.debug("Elementos recuperados en la página: " + response.getS().size());
+            if (statuses == null) {
+                statuses = response.getStatusList();
+            } else {
+                statuses.addAll(response.getStatusList());
+            }
+
+            nextPage++;
+            log.debug("getGlobalTimeline. Recuperados: " + statuses.size() + ". Next page: " + nextPage);
+            if (response.getS().isEmpty()) {
+                continuar = false;
+            } else {
+                if (statuses.size() >= quantity) {
                     continuar = false;
-                } else {
-                    if (statuses.size() >= quantity) {
-                        continuar = false;
-                    }
                 }
-            } while (continuar);
-            
-            return statuses.subList(0, Math.min(quantity, statuses.size()));
-        } catch (Exception e) {
-            throw e;
-        }
+            }
+        } while (continuar);
+
+        return statuses.subList(0, Math.min(quantity, statuses.size()));
     }
 }
